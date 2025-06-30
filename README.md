@@ -4,7 +4,17 @@ A comprehensive pipeline for downloading, processing, and analyzing German bioga
 
 ## 🎯 Overview
 
-This project provides a complete solution for building a database of German biogas and gas production facilities with integrated operator contact information. It processes data from the official German Marktstammdatenregister (MaStR) to create actionable datasets for business development, research, and market analysis.
+This project provides a complete solution for building a database of German biogas and gas production facilities with integrated operator conta### Performance
+
+### Download Times (approximate)
+- **Biomass + Gas only**: ~2 minutes
+- **Complete dataset**: ~15 minutes  
+- **Full pipeline**: ~20 minutes
+
+### Memory Usage
+- **Peak RAM**: ~2GB during processing
+- **Disk space**: Minimal storage for final datasets
+- **Output files**: 3 essential CSV files in `data/processed/`ion. It processes data from the official German Marktstammdatenregister (MaStR) to create actionable datasets for business development, research, and market analysis.
 
 ## 📊 Output Data
 
@@ -12,10 +22,11 @@ The pipeline generates comprehensive datasets optimized for biogas/biomethane ce
 
 ### Core Datasets
 
-- **`german_biogas_plants_final.csv`** (2.8MB) - **PRIMARY DATASET** with complete plant and operator details (properly deduplicated)
-- **`biogas_operators_consolidated.csv`** (1.2MB) - Deduplicated biogas operators with contact information
-- **`german_biogas_all_operators_deduplicated.csv`** (106MB) - Complete MaStR operator database (4.7M records)
-- **`german_biogas_plants_enhanced.csv`** (2.8MB) - Previous version (before operator consolidation)
+The project generates three essential CSV files in the `data/processed/` folder:
+
+- **`german_biogas_plants_final.csv`** - **PRIMARY DATASET** with complete plant and operator details (properly deduplicated)
+- **`biogas_operators_consolidated.csv`** - Deduplicated biogas operators with contact information  
+- **`biogas_operator_mapping.csv`** - Mapping file for operator deduplication and consolidation
 
 ### Utility Tools
 - **`csv_viewer.py`** - Python script for viewing large CSV files that VS Code cannot open directly
@@ -85,7 +96,7 @@ The pipeline will:
 - Cross-reference operator IDs and merge contact information
 - Create business-ready datasets with accurate market concentration statistics
 
-**Output files:** The pipeline generates `german_biogas_plants_final.csv` as the primary business-ready dataset.
+**Output files:** The pipeline generates three essential CSV files in `data/processed/`:
 
 ### Operator Deduplication Process
 
@@ -130,10 +141,10 @@ german-biogas-db/
 │       ├── strategic_analysis.py        # Business analysis
 │       └── business_analysis.py         # Market analysis tools
 ├── data/                          # Data storage
-│   ├── processed/                 # Clean, processed datasets (112MB)
-│   │   ├── german_biogas_plants_enhanced.csv        # Primary dataset
-│   │   ├── german_biogas_all_operators_deduplicated.csv  # Complete operators
-│   │   └── german_biogas_plants_with_contacts_clean.csv  # Cleaned plants
+│   ├── processed/                 # Clean, processed datasets
+│   │   ├── german_biogas_plants_final.csv        # Primary dataset
+│   │   ├── biogas_operators_consolidated.csv     # Consolidated operators
+│   │   └── biogas_operator_mapping.csv           # Operator mapping file
 │   └── raw/                       # Raw data cache
 │       └── mastr_live/           # MaStR download cache
 ├── scripts/                       # Main execution scripts
@@ -171,9 +182,9 @@ Key settings in `config.py`:
 ```python
 ```python
 # Output file paths - now organized in data/processed/
-OUT_PLANTS_CSV = Path("data/processed/german_biogas_plants_2025.csv")
-OUT_CONTACTS_XLSX = Path("data/processed/german_biogas_operator_contacts.xlsx") 
-OUT_JOIN_CSV = Path("data/processed/german_biogas_plants_with_contacts.csv")
+OUT_PLANTS_CSV = Path("data/processed/german_biogas_plants_final.csv")
+OUT_OPERATORS_CSV = Path("data/processed/biogas_operators_consolidated.csv") 
+OUT_MAPPING_CSV = Path("data/processed/biogas_operator_mapping.csv")
 
 # Processing parameters
 CHUNKSIZE = 50000              # Memory-efficient processing
@@ -182,7 +193,7 @@ MAXROWS_XLSX = 1000000         # Excel sheet row limit
 
 ## 📈 Data Schema
 
-### Enhanced Plant Data (`german_biogas_plants_enhanced.csv`)
+### Enhanced Plant Data (`german_biogas_plants_final.csv`)
 
 **Primary dataset optimized for certificate trading**
 
@@ -203,7 +214,7 @@ MAXROWS_XLSX = 1000000         # Excel sheet row limit
 | `operator_phone` | Operator phone | `+49123456789` |
 | `operator_website` | Operator website | `https://biogas-operator.de` |
 
-### Operator Database (`german_biogas_all_operators_deduplicated.csv`)
+### Operator Database (`biogas_operators_consolidated.csv`)
 
 **Complete German energy market actor database**
 
@@ -255,7 +266,7 @@ Processes plant technical data:
 import pandas as pd
 
 # Load plant data from organized structure
-plants = pd.read_csv("data/processed/german_biogas_plants_enhanced.csv")
+plants = pd.read_csv("data/processed/german_biogas_plants_final.csv")
 
 # Plants by commissioning year
 yearly_stats = plants.groupby('commissioning_year').agg({
@@ -270,15 +281,15 @@ top_regions = plants['postal_code'].value_counts().head(10)
 ### Contact Analysis
 
 ```python
-# Load merged data
-merged = pd.read_csv("data/processed/german_biogas_plants_with_contacts_clean.csv")
+# Load operator data
+operators = pd.read_csv("data/processed/biogas_operators_consolidated.csv")
 
 # Plants with contact information
-has_contact = merged.dropna(subset=['email', 'phone'], how='all')
-print(f"Contact coverage: {len(has_contact)/len(merged)*100:.1f}%")
+has_contact = operators.dropna(subset=['email', 'phone'], how='all')
+print(f"Contact coverage: {len(has_contact)/len(operators)*100:.1f}%")
 
 # Email domains analysis
-email_domains = merged['email'].str.extract(r'@(.+)$')[0].value_counts()
+email_domains = operators['email'].str.extract(r'@(.+)$')[0].value_counts()
 ```
 
 ## 📊 Analysis Results
