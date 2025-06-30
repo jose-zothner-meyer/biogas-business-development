@@ -1,0 +1,22 @@
+name: biogas-db
+channels:
+  - conda-forge
+dependencies:
+  # core
+  - python=3.11
+  - pandas
+  - openpyxl
+  - xlsxwriter
+  - tqdm
+  - requests
+  - beautifulsoup4
+  - lxml         # faster HTML parsing for BeautifulSoup
+  - zeep         # SOAP client for MaStR API
+
+  # Selenium bindings (driver is already on your PATH)
+  - selenium
+  
+  # pip-only packages
+  - pip
+  - pip:
+    - open-mastr  # Modern MaStR data access library
